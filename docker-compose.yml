@@ -1,0 +1,77 @@
+services:
+  db:
+    image: postgres:alpine
+    container_name: db_container
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: scraper_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - scraper_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d scraper_db"]
+      interval: 5s
+      retries: 5
+      timeout: 3s
+
+  scraper:
+    build: ./scraper
+    container_name: scraper_container
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db_container
+      DB_PORT: 5432
+      DB_NAME: scraper_db
+      DB_USER: user
+      DB_PASSWORD: password
+    networks:
+      - scraper_network
+    command: sh -c "while true; do python /app/scraper.py; sleep 60; done"
+
+  backend:
+    build: ./backend
+    container_name: backend_container
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db_container
+      DB_PORT: 5432
+      DB_NAME: scraper_db
+      DB_USER: user
+      DB_PASSWORD: password
+    networks:
+      - scraper_network
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 120s
+      retries: 3
+      timeout: 3s
+      start_period: 10s
+  
+  frontend:
+    build: ./frontend
+    container_name: frontend_container
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      REACT_APP_API_URL: "http://localhost:8000"  # Backend url
+    networks:
+      - scraper_network
+    ports:
+      - "3000:3000"
+
+
+
+volumes:
+  db_data:
+
+networks:
+  scraper_network:
