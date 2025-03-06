@@ -1,8 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import PostsScreen from './PostsScreen';
 import MetricsScreen from './MetricsScreen';
+
+// Componente de navegación separado para manejar la recarga de datos
+function Navigation({ onNavigate }) {
+  const location = useLocation();
+  const isPostsPage = location.pathname === '/posts';
+
+  return (
+    <div className="flex justify-end mb-4">
+      {isPostsPage ? (
+        <Link to="/metrics">
+          <button 
+            className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-200"
+            onClick={() => onNavigate('metrics')}
+          >
+            Métricas
+          </button>
+        </Link>
+      ) : (
+        <Link to="/posts">
+          <button 
+            className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-200"
+            onClick={() => onNavigate('posts')}
+          >
+            Posts
+          </button>
+        </Link>
+      )}
+    </div>
+  );
+}
 
 function App() {
   const [posts, setPosts] = useState([]);
@@ -38,6 +68,16 @@ function App() {
     }
   };
 
+  // Función para manejar la navegación y actualizar datos
+  const handleNavigate = (destination) => {
+    if (destination === 'posts') {
+      fetchPosts();
+    } else if (destination === 'metrics') {
+      fetchMetrics();
+    }
+  };
+
+  // Cargar datos iniciales
   useEffect(() => {
     fetchPosts();
     fetchMetrics();
@@ -55,25 +95,10 @@ function App() {
         {loading && <div id="loading" className="text-center text-blue-500">Cargando...</div>}
         {error && <div id="error" className="text-center text-red-500">{error}</div>}
 
-        {/* Navegacion */}
-        <div className="flex justify-end mb-4">
-          <Routes>
-            <Route path="/posts" element={
-              <Link to="/metrics">
-                <button className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-200">
-                  Métricas
-                </button>
-              </Link>
-            } />
-            <Route path="/metrics" element={
-              <Link to="/posts">
-                <button className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-200">
-                  Posts
-                </button>
-              </Link>
-            } />
-          </Routes>
-        </div>
+        {/* Navegacion con el componente que maneja la recarga */}
+        <Routes>
+          <Route path="*" element={<Navigation onNavigate={handleNavigate} />} />
+        </Routes>
 
         {/* Rutas */}
         <Routes>
