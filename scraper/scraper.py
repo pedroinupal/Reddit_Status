@@ -27,7 +27,8 @@ cursor.execute('''
         fecha_extraccion TIMESTAMP,
         subreddit TEXT,
         post_title TEXT,
-        url TEXT
+        url TEXT,
+        tiempo_extraccion float
     );
 ''')
 conn.commit()
@@ -45,6 +46,8 @@ for subreddit in subreddit_list:
     if response.status_code != 200:
         print(f"Error al obtener la página: {response.status_code}")
         continue  # Skip to the next subreddit if there's an error
+    
+    elapsed_time = float(response.elapsed.total_seconds())
 
     # Analizar HTML
     soup = BeautifulSoup(response.text, "html.parser")
@@ -54,8 +57,7 @@ for subreddit in subreddit_list:
     for post in posts[:10]:
         title = post.text.strip()
         link = "https://www.reddit.com" + post["href"]
-        cursor.execute("INSERT INTO Resultados (FECHA_EXTRACCION, SUBREDDIT, POST_TITLE, URL) VALUES (%s, %s, %s, %s)",
-                       (datetime.now(), subreddit, title, link))
+        cursor.execute("INSERT INTO Resultados (FECHA_EXTRACCION, SUBREDDIT, POST_TITLE, URL, TIEMPO_EXTRACCION) VALUES (%s, %s, %s, %s, %s)", (datetime.now(), subreddit, title, link,elapsed_time))
 
 conn.commit()
 cursor.close()
