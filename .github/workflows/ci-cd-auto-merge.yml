@@ -22,7 +22,7 @@ jobs:
         
       - name: Instalar Docker Compose
         run: |
-          apk add --no-cache docker-compose git
+          apk add --no-cache docker-compose git curl
           
       - name: Preparar archivo de configuración para Prometheus
         run: |
