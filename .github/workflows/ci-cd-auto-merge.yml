@@ -39,17 +39,16 @@ jobs:
           docker-compose up --build -d
           sleep 10  # Espera para que los contenedores se levanten
           docker ps  # Verifica que los contenedores están corriendo correctamente
-          
-      - name: Confirmar que todo salió bien y hacer merge a main
-        if: success()  # Solo se ejecuta si los pasos anteriores fueron exitosos
-        run: |
-          apk add --no-cache git
-          echo "Todo salió bien ✅ Los contenedores se levantaron correctamente."
-          echo "Se integrarán los cambios a la rama 'main'."
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-          git fetch origin main
-          git checkout main
-          git merge --ff-only dev
-          git push origin main
-          echo "Los cambios se integraron exitosamente a la rama 'main'."
+
+      - name: Confirm success
+        if: success()
+        run: echo "Todo salió bien ✅ Los contenedores se levantaron correctamente."
+
+      - name: Merge to main
+        if: success()
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: dev
+          target_branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
