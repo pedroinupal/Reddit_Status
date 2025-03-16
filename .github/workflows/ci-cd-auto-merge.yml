@@ -44,11 +44,19 @@ jobs:
         if: success()
         run: echo "Todo salió bien ✅ Los contenedores se levantaron correctamente."
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
+      - name: Create Pull Request using github-script
+        if: success()
+        uses: actions/github-script@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: "Automated Pull Request from dev to main"
-          body: "This is an automated PR to merge dev into main."
-          base: main
-          branch: dev
+          script: |
+            const response = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Automated PR from dev to main',
+              head: 'dev',
+              base: 'main',
+              body: 'This is an automated pull request to merge dev into main.',
+            });
+            console.log(response.data);
+        env:
+          GITHUB_TOKEN: ${{ secrets.GA_REDDIT }}
