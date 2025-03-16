@@ -47,8 +47,8 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.GA_REDDIT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           title: "Automated Pull Request from dev to main"
           body: "This is an automated PR to merge dev into main."
           base: main
-          head: dev
+          branch: dev
