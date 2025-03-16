@@ -44,11 +44,11 @@ jobs:
         if: success()
         run: echo "Todo salió bien ✅ Los contenedores se levantaron correctamente."
 
-      - name: Merge to main
-        if: success()
-        uses: devmasx/merge-branch@master
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
         with:
-          type: now
-          from_branch: dev
-          target_branch: main
-          github_token: ${{ secrets.GA_REDDIT }}
+          token: ${{ secrets.GA_REDDIT }}
+          title: "Automated Pull Request from dev to main"
+          body: "This is an automated PR to merge dev into main."
+          base: main
+          head: dev
