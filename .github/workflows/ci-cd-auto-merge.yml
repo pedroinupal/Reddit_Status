@@ -24,6 +24,16 @@ jobs:
         run: |
           apk add --no-cache docker-compose
           
+      - name: Preparar archivo de configuración para Prometheus
+        run: |
+          mkdir -p temp_prometheus
+          cp prometheus.yml temp_prometheus/
+          
+      - name: Modificar docker-compose temporalmente para CI/CD
+        run: |
+          sed -i 's|./prometheus.yml:/etc/prometheus/prometheus.yml|./temp_prometheus:/etc/prometheus|g' docker-compose.yml
+          cat docker-compose.yml
+          
       - name: Construir y levantar contenedores con Docker Compose
         run: |
           docker-compose up --build -d
