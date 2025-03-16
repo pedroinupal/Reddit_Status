@@ -42,7 +42,7 @@ jobs:
 
       - name: Confirm success
         if: success()
-        run: echo "Todo salió bien ✅ Los contenedores se levantaron correctamente, se creará un pull request "
+        run: echo "Todo salió bien ✅ Los contenedores se levantaron correctamente, se creará un pull request"
 
       - name: Crear Pull Request desde dev hacia main
         run: |
