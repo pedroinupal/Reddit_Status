@@ -8,20 +8,32 @@ on:
 jobs:
   test-and-merge:
     runs-on: ubuntu-latest
+    container: 
+      image: docker:20.10.21-dind
+    
+    services:
+      docker:
+        image: docker:20.10.21-dind
+        options: --privileged
 
     steps:
       - name: Checkout del código
         uses: actions/checkout@v3
-
+        
+      - name: Instalar Docker Compose
+        run: |
+          apk add --no-cache docker-compose
+          
       - name: Construir y levantar contenedores con Docker Compose
         run: |
           docker-compose up --build -d
           sleep 10  # Espera para que los contenedores se levanten
           docker ps  # Verifica que los contenedores están corriendo correctamente
-
+          
       - name: Confirmar que todo salió bien y hacer merge a main
         if: success()  # Solo se ejecuta si los pasos anteriores fueron exitosos
         run: |
+          apk add --no-cache git
           echo "Todo salió bien ✅ Los contenedores se levantaron correctamente."
           echo "Se integrarán los cambios a la rama 'main'."
           git config --global user.name "github-actions"
